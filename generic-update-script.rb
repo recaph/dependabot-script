@@ -7,13 +7,14 @@ require "dependabot/update_checkers"
 require "dependabot/file_updaters"
 require "dependabot/pull_request_creator"
 require "dependabot/omnibus"
-require "gitlab"
+
+github_user = ENV["GITHUB_USERNAME"] || "x-access-token"
 
 credentials = [
   {
     "type" => "git_source",
     "host" => "github.com",
-    "username" => "x-access-token",
+    "username" => github_user,
     "password" => ENV["GITHUB_ACCESS_TOKEN"] # A GitHub access token with read access to public repos
   }
 ]
@@ -42,66 +43,23 @@ directory = ENV["DIRECTORY_PATH"] || "/"
 # - terraform
 package_manager = ENV["PACKAGE_MANAGER"] || "bundler"
 
-if ENV["GITHUB_ENTERPRISE_ACCESS_TOKEN"]
-  credentials << {
-    "type" => "git_source",
-    "host" => ENV["GITHUB_ENTERPRISE_HOSTNAME"], # E.g., "ghe.mydomain.com",
-    "username" => "x-access-token",
-    "password" => ENV["GITHUB_ENTERPRISE_ACCESS_TOKEN"] # A GHE access token with API permission
-  }
+branch_select = ENV["GITHUB_ENTERPRISE_HOSTNAME"] || "master"
 
-  source = Dependabot::Source.new(
-    provider: "github",
-    hostname: ENV["GITHUB_ENTERPRISE_HOSTNAME"],
-    api_endpoint: "https://#{ENV['GITHUB_ENTERPRISE_HOSTNAME']}/api/v3/",
-    repo: repo_name,
-    directory: directory,
-    branch: nil,
-  )
-elsif ENV["GITLAB_ACCESS_TOKEN"]
-  gitlab_hostname = ENV["GITLAB_HOSTNAME"] || "gitlab.com"
+credentials << {
+  "type" => "git_source",
+  "host" => ENV["GITHUB_ENTERPRISE_HOSTNAME"], # E.g., "ghe.mydomain.com",
+  "username" => "x-access-token",
+  "password" => ENV["GITHUB_ENTERPRISE_ACCESS_TOKEN"] # A GHE access token with API permission
+}
 
-  credentials << {
-    "type" => "git_source",
-    "host" => gitlab_hostname,
-    "username" => "x-access-token",
-    "password" => ENV["GITLAB_ACCESS_TOKEN"] # A GitLab access token with API permission
-  }
-
-  source = Dependabot::Source.new(
-    provider: "gitlab",
-    hostname: gitlab_hostname,
-    api_endpoint: "https://#{gitlab_hostname}/api/v4",
-    repo: repo_name,
-    directory: directory,
-    branch: nil,
-  )
-elsif ENV["AZURE_ACCESS_TOKEN"]
-  azure_hostname = ENV["AZURE_HOSTNAME"] || "dev.azure.com"
-
-  credentials << {
-    "type" => "git_source",
-    "host" => azure_hostname,
-    "username" => "x-access-token",
-    "password" => ENV["AZURE_ACCESS_TOKEN"]
-  }
-
-  source = Dependabot::Source.new(
-    provider: "azure",
-    hostname: azure_hostname,
-    api_endpoint: "https://#{azure_hostname}/",
-    repo: repo_name,
-    directory: directory,
-    branch: nil,
-  )
-else
-  source = Dependabot::Source.new(
-    provider: "github",
-    repo: repo_name,
-    directory: directory,
-    branch: nil,
-  )
-end
+source = Dependabot::Source.new(
+  provider: "github",
+  hostname: ENV["GITHUB_ENTERPRISE_HOSTNAME"],
+  api_endpoint: "https://#{ENV['GITHUB_ENTERPRISE_HOSTNAME']}/api/v3/",
+  repo: repo_name,
+  directory: directory,
+  branch: branch_select,
+)
 
 ##############################
 # Fetch the dependency files #
@@ -176,28 +134,13 @@ dependencies.select(&:top_level?).each do |dep|
     dependencies: updated_deps,
     files: updated_files,
     credentials: credentials,
-    assignees: [(ENV["PULL_REQUESTS_ASSIGNEE"] || ENV["GITLAB_ASSIGNEE_ID"])&.to_i],
+    assignees: [ENV["GITHUB_ENTERPRISE_HOSTNAME")&.to_i],
     label_language: true,
   )
   pull_request = pr_creator.create
   puts " submitted"
 
   next unless pull_request
-
-  # Enable GitLab "merge when pipeline succeeds" feature.
-  # Merge requests created and successfully tested will be merge automatically.
-  if ENV["GITLAB_AUTO_MERGE"]
-    g = Gitlab.client(
-      endpoint: source.api_endpoint,
-      private_token: ENV["GITLAB_ACCESS_TOKEN"]
-    )
-    g.accept_merge_request(
-      source.repo,
-      pull_request.iid,
-      merge_when_pipeline_succeeds: true,
-      should_remove_source_branch: true
-    )
-  end
 end
 
 puts "Done"
