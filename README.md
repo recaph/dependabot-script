@@ -107,7 +107,7 @@ Parsing dependencies information
 ## The scripts
 
 * [Single dependency update script][github-script]
-* [GitLab/GHE update script][generic-script]
+* [GHE update script][generic-script]
 
 [github-script]: update-script.rb
 [generic-script]: generic-update-script.rb
