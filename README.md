@@ -91,18 +91,11 @@ You'll have to set some mandatory variables like `PROJECT_PATH` and `PACKAGE_MAN
 There are other variables that you must pass to your container that will depend on the Git source you use:
 
 * Github
+    * GITHUB_USERNAME (OPTIONAL)
     * GITHUB_ACCESS_TOKEN
 * Github Enterprise
-    * GITHUB_ENTERPRISE_HOSTNAME
+    * GITHUB_ENTERPRISE_HOSTNAME  (including in user:token@ghe.company.com format)
     * GITHUB_ENTERPRISE_ACCESS_TOKEN
-* Gitlab
-    * GITLAB_HOSTNAME: default value `gitlab.com`
-    * GITLAB_ACCESS_TOKEN
-* Azure DevOps
-    * AZURE_HOSTNAME: default value `dev.azure.com`
-    * AZURE_ACCESS_TOKEN
-    * PROJECT_PATH: `organization/project/_git/package-name`
-
 
 If everything goes well you should be able to see something like:
 
