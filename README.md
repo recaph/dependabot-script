@@ -1,11 +1,9 @@
-# Dependabot Update Script [![Dependabot Status](https://api.dependabot.com/badges/status?host=github&identifier=131328855)](https://dependabot.com)
+# Dependabot Update Script
 
-This repo contains two scripts that demonstrates
-[Dependabot Core][dependabot-core]. It is intended to give you a feel for how
-Dependabot Core works so that you can use it in your own project.
+This repo contains two scripts that demonstrates [Dependabot Core][dependabot-core]. 
+It is intended to give you a feel for how Dependabot Core works so that you can use it in your own project.
 
-If you're looking for a hosted, feature-rich dependency updater then you
-probably want [Dependabot][dependabot] itself.
+If you're looking for a hosted, feature-rich dependency updater then you probably want [Dependabot][dependabot] itself.
 
 ## Setup and usage
 
@@ -90,12 +88,12 @@ You'll have to pass the right environment variables to make the script work with
 You'll have to set some mandatory variables like `PROJECT_PATH` and `PACKAGE_MANAGER` (see [script](https://github.com/dependabot/dependabot-script/blob/master/generic-update-script.rb) to know more).
 There are other variables that you must pass to your container that will depend on the Git source you use:
 
-* Github
-    * GITHUB_USERNAME (OPTIONAL)
-    * GITHUB_ACCESS_TOKEN
+* Github (required to allow detection of latest versions of dependencies)
+    * GITHUB_USERNAME (OPTIONAL) 
+    * GITHUB_ACCESS_TOKEN (required)
 * Github Enterprise
-    * GITHUB_ENTERPRISE_HOSTNAME  (including in user:token@ghe.company.com format)
-    * GITHUB_ENTERPRISE_ACCESS_TOKEN
+    * GITHUB_ENTERPRISE_HOSTNAME  (in the format user:token@ghe.company.com or github.com)
+    * GITHUB_ENTERPRISE_ACCESS_TOKEN (required)
 
 If everything goes well you should be able to see something like:
 
@@ -105,24 +103,6 @@ Fetching gradle dependency files for myorganisation/project
 Parsing dependencies information
 ...
 ```
-
-### GitLab CI
-
-The easiest configuration is to have a repository dedicated to the script.
-Many pipeline schedules can be added on that single repo to manage multiple projects.  
-Thus `https://[gitlab.domain/org/dependabot-script-repo]/pipeline_schedules` dashboard becomes your own dependabot admin interface.
-
-* Clone or mirror this repository.
-* Copy `.gitlab-ci.example.yml` to `.gitlab-ci.yml` or set [a custom CI config path for direct usage](https://docs.gitlab.com/ee/user/project/pipelines/settings.html#custom-ci-config-path).
-* [Set the required global variables](https://docs.gitlab.com/ee/ci/variables/#variables) used in [`./generic-update-script.rb`][generic-script].
-* Create [a pipeline schedule](https://docs.gitlab.com/ee/user/project/pipelines/schedules.html) for each managed repository.
-* Set in the schedule the required variables:
-  * `PROJECT_PATH`: `group/repository`
-  * `PACKAGE_MANAGER_SET`: `bundler,composer,npm_and_yarn`
-* If you'd like to specify the directory that contains the manifest file in the repository, you can set the following environment variable:
-  * `DIRECTORY_PATH`: `/path/to/point`
-* If you'd like Merge Requests to be assigned to a user, set the following environment variable:
-  * `PULL_REQUESTS_ASSIGNEE`: Integer ID of the user to assign. This can be found at `https://gitlab.com/api/v4/users?username=<your username>`
 
 ## The scripts
 
